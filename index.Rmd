@@ -1,0 +1,75 @@
+---
+title: "STATS5099 Data Mining and Machine Learning"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+biblio-style: apalike
+link-citations: yes
+---
+
+```{r setup, include = FALSE}
+library(webexercises)
+library(tinytex)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+knitr::opts_chunk$set(echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE)
+
+library(rpart)
+library(rpart.plot)
+library(randomForest)
+options(digits=7)
+```
+
+
+```{r include=FALSE, echo=FALSE}
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```
+
+
+# Welcome to DMML Lab 4
+
+In week 4, we have studied three tree-based methods, namely classification trees, bagging and random forests.
+
+## Classification trees
+
+Classification trees can be implemented by using the `rpart` and `rpart.plot` packages. Some key codes are summarised below.
+```{r eval=FALSE}
+library(rpart); library(rpart.plot)
+# build a tree for dataset 'Data' with features 'X1', 'X2' etc and class label 'Y'
+Model <- rpart(Y~X1+X2+..., data=Data, method="class")
+Model
+# visualise the tree
+rpart.plot(Model, type=2, extra=4) #check help page for more options about type and extra
+# make predictions for new data with features 'Xnew'
+Ynew.pred <- predict(Model, newdata=Xnew, type="class")
+```
+
+One thing to be cautious when building the tree (or any classifier) is to avoid overfitting. This can be achieved by either setting stopping criteria to prevent tree from growing, or pruning a large tree back to simple trees.
+```{r eval=FALSE}
+# set stopping criteria via 'control': smaller values of minsplit, minbucket and cp
+# and larger value of maxdepth lead to a larger tree
+Model2 <- rpart(Y~X1+X2+..., data=Data, method="class",
+                control=rpart.control(minsplit=20, minbucket=round(minsplit/3),
+                                      maxdepth = 30, cp=0.01))
+                                      #values are set as default
+
+# prune the tree
+printcp(Model)
+plotcp(Model)
+```
+
+## Bagging and random forests
+
+Bagging and random forests can be both implemented by using the `randomForest` function from the `randomForest` package. The difference is that in bagging, all features are used to build the tree for each bootstrapped sample, whereas in random forests, only a subset of features are used (set as the square root of all features by default).
+
+```{r eval=FALSE}
+library(randomForest)
+# bagging
+Model <- randomForest(Y~X1+X2+..., data=Data, mtry=n_feature) #n_feature is the number of features in the data
+
+# random forests
+Model <- randomForest(Y~X1+X2+..., data=Data)
+```

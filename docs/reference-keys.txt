@@ -1,0 +1,10 @@
+tab:unnamed-chunk-28
+welcome-to-dmml-lab-4
+classification-trees
+bagging-and-random-forests
+exercise-1-crabs-data
+pruning
+exercise-2-titanic-data
+solution
+exercise-1
+exercise-2

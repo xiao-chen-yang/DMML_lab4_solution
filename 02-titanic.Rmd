@@ -1,0 +1,54 @@
+# Exercise 2: Titanic Data
+
+The Titanic data can be downloaded from the `titanic` package in R. Once you do that, there will be two data sets loaded in R; a training data set, `titanic_train`, and a test data set, `test_train`. The dataset includes 12 variables, described as follows: 
+
+* PassengerID: Passenger ID
+* Survived: Survival (0 = No; 1 = Yes)
+* Pclass: Passenger Class (1 = 1st; 2 = 2nd; 3 = 3rd)
+* Name: Name
+* Sex: Sex
+* Age: Age
+* SibSp: Number of Siblings/Spouses Aboard
+* Parch: Number of Parents/Children Aboard
+* Ticket: Ticket Number
+* Fare:  Passenger Fare (British pound)
+* Cabin: Cabin
+* Embarked: Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton)
+
+Your task is to create a model that predicts who survives and who dies during the Titanic event using bagging and random forest, and compare between the two approaches.
+
+**Task**
+
+1. Perform some exploratory analysis on this data. In particular, understand the variable type, distribution of each variable, and identify which variables may be useful in predicting survival status. 
+
+`r hide("Hint")`
+Try `str`, `skim`, `summary` for numerical summaries and `plot`, `pairs` for graphical summaries.
+`r unhide()`
+
+2. Split the training data `titanic_train` further into a training (80%) and validation (20%) set. 
+<br>
+
+This dataset includes missing data. Unlike classification trees which can construct the tree using surrogate splits, bagging and random forest cannot be directly applied to missing data. To fix it, we use the rough imputation method ,`na.roughfix`, provided in the `randomForest` package, which replaces missing values of continuous variables with their medians and missing values of categorical variables with their modes. More details can be found in the package [documentation](https://cran.r-project.org/web/packages/randomForest/randomForest.pdf). 
+
+```{r, eval=FALSE}
+library(randomForest)
+train.imputed <- na.roughfix(train) #train: training data after training/validation split
+```
+
+3. Apply bagging and random forest to the imputed training data (`train.imputed`). Which method would you prefer in this case? 
+
+`r hide("Hint")`
+a. Use the command `randomForest` for building a bagging and random forest classifier. Remember to change the argument `mtry` when applying bagging. 
+b. Compare the two methods based on some appropriate evaluation criteria. 
+`r unhide()`
+
+4. Which variables are important in predicting survival under bagging and random forest? 
+`r hide("Hint")`
+Use the command `varImpPlot` or use `ggplot` as in Examples 11 and 12 in Week 4 lecture note.
+`r unhide()`
+
+5. Use the built model to predict the test data `titanic_test`. 
+
+**Optional Task**
+
+Build a classification tree on Titanic train and compare its result with Bagging and Random Forest. 

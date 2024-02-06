@@ -1,0 +1,131 @@
+# Exercise 1: Crabs Data
+
+In the `crabs` data example we are interested in predicting the sex of a crab based on its morphological measurements. This data is available in the `MASS` library with the following variables:
+
+* sp: species - “B” or “O” for blue or orange (not used);
+* sex: as it says (the classification variable of interest);
+* index: index 1:50 within each of the four groups (not used);
+* FL: frontal lobe size (mm);
+* RW: rear width (mm);
+* CL: carapace length (mm);
+* CW: carapace width (mm);
+* BD: body depth (mm).
+
+This data can be extracted from the `MASS` library via:
+```{r}
+library(MASS)
+data(crabs)
+```
+
+We are interested in predicting the sex of the crab based on the last 5 variables, so we create a data frame of these variables to be used.
+```{r}
+data.crabs <- as.data.frame(crabs[, c(2, 4:8)])
+```
+
+
+**Task**
+
+1. Split the data into training, validation and test data sets (50%, 25%, 25% for each set).
+```{r echo=FALSE}
+set.seed(2023)
+n <- nrow(crabs)
+ind1 <- sample(c(1:n), round(n/2))
+ind2 <- sample(c(1:n)[-ind1], round(n/4))
+ind3 <- setdiff(c(1:n),c(ind1,ind2))
+train.crab <- data.crabs[ind1, ]
+valid.crab <- data.crabs[ind2, ]
+test.crab  <- data.crabs[ind2, ]
+```
+
+`r hide("Hint")`
+Check Lab 3, Section 2.2.1.
+`r unhide()`
+
+2. Build a classification tree on the training data and plot the tree. Note down the decision rules for each node and ensure that you understand what each of the numbers mean.
+
+`r hide("Hint")`
+Use the `rpart` and `rpart.plot` commands to build and visualise the classification tree.
+`r unhide()`
+
+```{r, echo=FALSE}
+crabs.rt <- rpart(sex~FL + RW +  CL  + CW + BD, data=train.crab, method="class")
+```
+
+
+3. Print out the rules of the classification tree built in step 2. Again, you should understand what each of the numbers corresponds to.
+
+4. Based on the plot or output of the classification tree, predict the class for the following observation.
+
+```{r, echo=FALSE}
+valid.crab[1,-1]
+```
+
+You can also check the result by using the `predict` function in `R`.
+```{r eval=FALSE}
+predict(crabs.rt, newdata=valid.crab[1,-1],type="class")
+```
+
+5. How could you determine if the classification tree is under-fitting or overfitting?
+
+`r hide("Hint")`
+(a) Which evaluation criteria may be used to assess the performance of classification tree?
+
+(b) Calculate sensitivity and specificity for training and validation sets, assuming female is the positive class and male is the negative class.
+
+(c) Based on results in (b), what's your conclusion about under-/over-fitting?
+
+`r unhide()`
+
+## Pruning
+We may also want to reduce the size of the tree (prune it) to avoid overfitting and maximising the chance of being gerenalisable to future data. We can do this using cross-validation as below. Either look at the cross-validation complexity plot or use the output of the xerror (cross-validation error) variable.
+
+There are two strategies to choose the value of complexity parameter
+(and the corresponding tree size). The first option is to prune the tree back to the point where the cross-validated error is a minimum, known as the *minimum error* strategy. The second option is to prune the tree using the complexity parameter of the smallest tree that is within one standard deviation of the tree with the smallest xerror, known as the *smallest tree* strategy. In the case that there are multiple trees with the same xerror; we will choose the smaller one (since that tree would predict as well as the other one but it would also have fewer branches; thus we can also avoid overfitting). 
+
+**Task**
+
+6. Build a fully grown tree.
+
+`r hide("Hint")`
+Change the values of minsplit, minbucket, maxdepth and cp in `rpart.control`.
+`r unhide()`
+
+```{r echo=FALSE}
+Full_tree <- rpart(sex~FL + RW +  CL  + CW + BD, data=train.crab, method="class",
+                   control=rpart.control(minsplit=2, minbucket=1, maxdepth=30, cp=-1))
+```
+
+
+7. The complexity parameter (cp) table for the fitted tree can be produced by using `printcp`. Given the output from a fully grown tree, decide the appropriate cp value using both the minimum error strategy and the smallest tree strategy.
+
+```{r}
+printcp(Full_tree)
+```
+
+*For the following four questions, enter your answer by rounding to 3 decimal places*.
+
+(a) What is the training error rate after 4 splits? `r fitb(seq(0.1))`
+
+`r hide("Hint")`
+The training error rate equals to `rel error` (relative training error rate) multiplied by `root node error`. 
+`r unhide()`
+
+(b) What is the cross-validation error rate after 4 splits? `r fitb(seq(0.260))`
+
+`r hide("Hint")`
+The cross-validation error rate equals to `xerror` multiplied by `root node error`. 
+`r unhide()`
+
+(c) Which cp value you would choose when using the minimum error strategy? `r fitb(seq(0.011,0.020,0.001))`
+
+(d) Which cp value you would choose when using the smallest tree strategy? `r fitb(seq(0.031,0.051,0.001))`
+<br>
+
+We could also choose the cp value according to the cp plot. The minimum error strategy refers to the cp value which has the lowest X-val Relative Error. The smallest tree strategy refers to the largest cp value which is under the dashed line; the intercept of this line equals to the minimum xerror plus its standard deviation. 
+```{r, out.width="80%", fig.align='center'}
+plotcp(Full_tree)
+```
+
+8. Prune the fully grown classification tree using the cp value found from the smallest tree strategy. Calculate sensitivity and specificity for training and validation sets again and compare to the results in Task 5. 
+
+

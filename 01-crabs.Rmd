@@ -76,14 +76,6 @@ predict(crabs.rt, newdata=valid.crab[1,-1],type="class")
 
 `r unhide()`
 
-## Pruning
-We may also want to reduce the size of the tree (prune it) to avoid overfitting and maximising the chance of being gerenalisable to future data. We can do this using cross-validation as below. Either look at the cross-validation complexity plot or use the output of the xerror (cross-validation error) variable.
-
-There are two strategies to choose the value of complexity parameter
-(and the corresponding tree size). The first option is to prune the tree back to the point where the cross-validated error is a minimum, known as the *minimum error* strategy. The second option is to prune the tree using the complexity parameter of the smallest tree that is within one standard deviation of the tree with the smallest xerror, known as the *smallest tree* strategy. In the case that there are multiple trees with the same xerror; we will choose the smaller one (since that tree would predict as well as the other one but it would also have fewer branches; thus we can also avoid overfitting). 
-
-**Task**
-
 6. Build a fully grown tree.
 
 `r hide("Hint")`

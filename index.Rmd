@@ -47,7 +47,7 @@ rpart.plot(Model, type=2, extra=4) #check help page for more options about type 
 Ynew.pred <- predict(Model, newdata=Xnew, type="class")
 ```
 
-One thing to be cautious when building the tree (or any classifier) is to avoid overfitting. This can be achieved by either setting stopping criteria to prevent tree from growing, or pruning a large tree back to simple trees.
+One thing to be cautious when building the tree (or any classifier) is to avoid overfitting. This can be achieved by setting stopping criteria to prevent tree from growing, using arguments as listed below.
 ```{r eval=FALSE}
 # set stopping criteria via 'control': smaller values of minsplit, minbucket and cp
 # and larger value of maxdepth lead to a larger tree
@@ -55,11 +55,39 @@ Model2 <- rpart(Y~X1+X2+..., data=Data, method="class",
                 control=rpart.control(minsplit=20, minbucket=round(minsplit/3),
                                       maxdepth = 30, cp=0.01))
                                       #values are set as default
-
-# prune the tree
-printcp(Model)
-plotcp(Model)
 ```
+
+## Pruning
+An alternative approach to avoid overfitting is by pruning. The idea of pruning is to first build a very large tree and then remove subtrees that carry less information. To determine how much of the tree should be pruned, we need to decide the appropriate value of cost complexity, which can be found by either looking at the cross-validation cost complexity plot or using the output of the xerror (cross-validation error) variable. 
+
+The `R` commands for producing the cross-validation cost complexity plot or table are listed below:
+
+```{r eval=FALSE}
+plotcp(Model)
+printcp(Model)
+```
+
+**QUESTION**: (Lecture note, task 3) For the fully grown tree printed below, compute:
+
+* the cross validation error rate when there are 9 splits in that tree;
+
+* the training data error rate when we do not have to prune the tree at all (i.e. after 178 splits).
+
+```{r echo=FALSE}
+load("German.Rdata")
+train <- German_train
+
+set.seed(1)
+second_tree_fully_grown <- rpart(Creditability~Age+Length_of_cur_employment
+                                 +Purpose, data=train, method="class",
+                                 parms=list(split='information'),
+                                 cp=-1, minsplit=2, minbucket=1)
+
+printcp(second_tree_fully_grown)
+plotcp(second_tree_fully_grown)
+```
+
+There are two strategies to choose the value of complexity parameter (and the corresponding tree size). The first option is to prune the tree back to the point where the cross-validated error is a minimum, known as the *minimum error* strategy. The second option is to prune the tree using the complexity parameter of the smallest tree that is within one standard deviation of the tree with the smallest xerror, known as the *smallest tree* strategy. In the case that there are multiple trees with the same xerror; we will choose the smaller one (since that tree would predict as well as the other one but it would also have fewer branches; thus we can also avoid overfitting). 
 
 ## Bagging and random forests
 

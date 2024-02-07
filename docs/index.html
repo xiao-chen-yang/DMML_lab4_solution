@@ -139,12 +139,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Welcome to DMML Lab 4</a>
 <ul>
 <li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#classification-trees"><i class="fa fa-check"></i><b>1.1</b> Classification trees</a></li>
-<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#bagging-and-random-forests"><i class="fa fa-check"></i><b>1.2</b> Bagging and random forests</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#pruning"><i class="fa fa-check"></i><b>1.2</b> Pruning</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#bagging-and-random-forests"><i class="fa fa-check"></i><b>1.3</b> Bagging and random forests</a></li>
 </ul></li>
-<li class="chapter" data-level="2" data-path="exercise-1-crabs-data.html"><a href="exercise-1-crabs-data.html"><i class="fa fa-check"></i><b>2</b> Exercise 1: Crabs Data</a>
-<ul>
-<li class="chapter" data-level="2.1" data-path="exercise-1-crabs-data.html"><a href="exercise-1-crabs-data.html#pruning"><i class="fa fa-check"></i><b>2.1</b> Pruning</a></li>
-</ul></li>
+<li class="chapter" data-level="2" data-path="exercise-1-crabs-data.html"><a href="exercise-1-crabs-data.html"><i class="fa fa-check"></i><b>2</b> Exercise 1: Crabs Data</a></li>
 <li class="chapter" data-level="3" data-path="exercise-2-titanic-data.html"><a href="exercise-2-titanic-data.html"><i class="fa fa-check"></i><b>3</b> Exercise 2: Titanic Data</a></li>
 <li class="chapter" data-level="4" data-path="solution.html"><a href="solution.html"><i class="fa fa-check"></i><b>4</b> Solution</a>
 <ul>
@@ -185,27 +183,67 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-6"><a href="index.html#cb1-6" tabindex="-1"></a><span class="fu">rpart.plot</span>(Model, <span class="at">type=</span><span class="dv">2</span>, <span class="at">extra=</span><span class="dv">4</span>) <span class="co">#check help page for more options about type and extra</span></span>
 <span id="cb1-7"><a href="index.html#cb1-7" tabindex="-1"></a><span class="co"># make predictions for new data with features &#39;Xnew&#39;</span></span>
 <span id="cb1-8"><a href="index.html#cb1-8" tabindex="-1"></a>Ynew.pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(Model, <span class="at">newdata=</span>Xnew, <span class="at">type=</span><span class="st">&quot;class&quot;</span>)</span></code></pre></div>
-<p>One thing to be cautious when building the tree (or any classifier) is to avoid overfitting. This can be achieved by either setting stopping criteria to prevent tree from growing, or pruning a large tree back to simple trees.</p>
+<p>One thing to be cautious when building the tree (or any classifier) is to avoid overfitting. This can be achieved by setting stopping criteria to prevent tree from growing, using arguments as listed below.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="index.html#cb2-1" tabindex="-1"></a><span class="co"># set stopping criteria via &#39;control&#39;: smaller values of minsplit, minbucket and cp</span></span>
 <span id="cb2-2"><a href="index.html#cb2-2" tabindex="-1"></a><span class="co"># and larger value of maxdepth lead to a larger tree</span></span>
 <span id="cb2-3"><a href="index.html#cb2-3" tabindex="-1"></a>Model2 <span class="ot">&lt;-</span> <span class="fu">rpart</span>(Y<span class="sc">~</span>X1<span class="sc">+</span>X2<span class="sc">+</span>..., <span class="at">data=</span>Data, <span class="at">method=</span><span class="st">&quot;class&quot;</span>,</span>
 <span id="cb2-4"><a href="index.html#cb2-4" tabindex="-1"></a>                <span class="at">control=</span><span class="fu">rpart.control</span>(<span class="at">minsplit=</span><span class="dv">20</span>, <span class="at">minbucket=</span><span class="fu">round</span>(minsplit<span class="sc">/</span><span class="dv">3</span>),</span>
 <span id="cb2-5"><a href="index.html#cb2-5" tabindex="-1"></a>                                      <span class="at">maxdepth =</span> <span class="dv">30</span>, <span class="at">cp=</span><span class="fl">0.01</span>))</span>
-<span id="cb2-6"><a href="index.html#cb2-6" tabindex="-1"></a>                                      <span class="co">#values are set as default</span></span>
-<span id="cb2-7"><a href="index.html#cb2-7" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="index.html#cb2-8" tabindex="-1"></a><span class="co"># prune the tree</span></span>
-<span id="cb2-9"><a href="index.html#cb2-9" tabindex="-1"></a><span class="fu">printcp</span>(Model)</span>
-<span id="cb2-10"><a href="index.html#cb2-10" tabindex="-1"></a><span class="fu">plotcp</span>(Model)</span></code></pre></div>
+<span id="cb2-6"><a href="index.html#cb2-6" tabindex="-1"></a>                                      <span class="co">#values are set as default</span></span></code></pre></div>
 </div>
-<div id="bagging-and-random-forests" class="section level2 hasAnchor" number="1.2">
-<h2><span class="header-section-number">1.2</span> Bagging and random forests<a href="index.html#bagging-and-random-forests" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="pruning" class="section level2 hasAnchor" number="1.2">
+<h2><span class="header-section-number">1.2</span> Pruning<a href="index.html#pruning" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>An alternative approach to avoid overfitting is by pruning. The idea of pruning is to first build a very large tree and then remove subtrees that carry less information. To determine how much of the tree should be pruned, we need to decide the appropriate value of cost complexity, which can be found by either looking at the cross-validation cost complexity plot or using the output of the xerror (cross-validation error) variable.</p>
+<p>The <code>R</code> commands for producing the cross-validation cost complexity plot or table are listed below:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="index.html#cb3-1" tabindex="-1"></a><span class="fu">plotcp</span>(Model)</span>
+<span id="cb3-2"><a href="index.html#cb3-2" tabindex="-1"></a><span class="fu">printcp</span>(Model)</span></code></pre></div>
+<p><strong>QUESTION</strong>: (Lecture note, task 3) For the fully grown tree printed below, compute:</p>
+<ul>
+<li><p>the cross validation error rate when there are 9 splits in that tree;</p></li>
+<li><p>the training data error rate when we do not have to prune the tree at all (i.e. after 178 splits).</p></li>
+</ul>
+<pre><code>## 
+## Classification tree:
+## rpart(formula = Creditability ~ Age + Length_of_cur_employment + 
+##     Purpose, data = train, method = &quot;class&quot;, parms = list(split = &quot;information&quot;), 
+##     cp = -1, minsplit = 2, minbucket = 1)
+## 
+## Variables actually used in tree construction:
+## [1] Age                      Length_of_cur_employment Purpose                 
+## 
+## Root node error: 143/500 = 0.286
+## 
+## n= 500 
+## 
+##            CP nsplit rel error  xerror     xstd
+## 1   0.0244755      0   1.00000 1.00000 0.070661
+## 2   0.0139860      2   0.95105 0.99301 0.070512
+## 3   0.0069930      3   0.93706 1.01399 0.070954
+## 4   0.0052448      9   0.89510 1.13287 0.073180
+## 5   0.0046620     17   0.85315 1.19580 0.074178
+## 6   0.0043706     44   0.69930 1.18182 0.073967
+## 7   0.0034965     52   0.66434 1.18182 0.073967
+## 8   0.0031080     66   0.61538 1.23776 0.074777
+## 9   0.0027972     81   0.56643 1.23776 0.074777
+## 10  0.0026224     86   0.55245 1.23776 0.074777
+## 11  0.0023310     94   0.53147 1.32867 0.075899
+## 12  0.0021517    103   0.51049 1.31469 0.075742
+## 13  0.0017483    120   0.46853 1.31469 0.075742
+## 14  0.0013986    124   0.46154 1.31469 0.075742
+## 15  0.0000000    129   0.45455 1.31469 0.075742
+## 16 -1.0000000    178   0.45455 1.31469 0.075742</code></pre>
+<p><img src="main_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>There are two strategies to choose the value of complexity parameter (and the corresponding tree size). The first option is to prune the tree back to the point where the cross-validated error is a minimum, known as the <em>minimum error</em> strategy. The second option is to prune the tree using the complexity parameter of the smallest tree that is within one standard deviation of the tree with the smallest xerror, known as the <em>smallest tree</em> strategy. In the case that there are multiple trees with the same xerror; we will choose the smaller one (since that tree would predict as well as the other one but it would also have fewer branches; thus we can also avoid overfitting).</p>
+</div>
+<div id="bagging-and-random-forests" class="section level2 hasAnchor" number="1.3">
+<h2><span class="header-section-number">1.3</span> Bagging and random forests<a href="index.html#bagging-and-random-forests" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Bagging and random forests can be both implemented by using the <code>randomForest</code> function from the <code>randomForest</code> package. The difference is that in bagging, all features are used to build the tree for each bootstrapped sample, whereas in random forests, only a subset of features are used (set as the square root of all features by default).</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="index.html#cb3-1" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
-<span id="cb3-2"><a href="index.html#cb3-2" tabindex="-1"></a><span class="co"># bagging</span></span>
-<span id="cb3-3"><a href="index.html#cb3-3" tabindex="-1"></a>Model <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(Y<span class="sc">~</span>X1<span class="sc">+</span>X2<span class="sc">+</span>..., <span class="at">data=</span>Data, <span class="at">mtry=</span>n_feature) <span class="co">#n_feature is the number of features in the data</span></span>
-<span id="cb3-4"><a href="index.html#cb3-4" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="index.html#cb3-5" tabindex="-1"></a><span class="co"># random forests</span></span>
-<span id="cb3-6"><a href="index.html#cb3-6" tabindex="-1"></a>Model <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(Y<span class="sc">~</span>X1<span class="sc">+</span>X2<span class="sc">+</span>..., <span class="at">data=</span>Data)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="index.html#cb5-1" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb5-2"><a href="index.html#cb5-2" tabindex="-1"></a><span class="co"># bagging</span></span>
+<span id="cb5-3"><a href="index.html#cb5-3" tabindex="-1"></a>Model <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(Y<span class="sc">~</span>X1<span class="sc">+</span>X2<span class="sc">+</span>..., <span class="at">data=</span>Data, <span class="at">mtry=</span>n_feature) <span class="co">#n_feature is the number of features in the data</span></span>
+<span id="cb5-4"><a href="index.html#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="index.html#cb5-5" tabindex="-1"></a><span class="co"># random forests</span></span>
+<span id="cb5-6"><a href="index.html#cb5-6" tabindex="-1"></a>Model <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(Y<span class="sc">~</span>X1<span class="sc">+</span>X2<span class="sc">+</span>..., <span class="at">data=</span>Data)</span></code></pre></div>
 
 </div>
 </div>
